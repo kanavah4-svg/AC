@@ -8,14 +8,14 @@ from sklearn.cluster import KMeans
 from sklearn.metrics import accuracy_score, classification_report
 import plotly.express as px
 
-# Luxury colour palette for all charts – coherent & premium
+# Pastel luxury colour palette for charts
 PALETTE = [
-    "#1F2933",  # deep ink
-    "#C28D44",  # antique gold
-    "#D4B59D",  # warm beige / leather
-    "#9CA3AF",  # soft grey
-    "#7F9C96",  # muted sage
-    "#C4A6B6",  # dusty mauve
+    "#D4AF37",  # soft gold
+    "#F5CBA7",  # peach-beige
+    "#F9E79F",  # light champagne
+    "#AED6F1",  # powder blue
+    "#F5B7B1",  # blush pink
+    "#D7BDE2",  # lavender
 ]
 
 @st.cache_data
@@ -84,27 +84,27 @@ def main():
         unsafe_allow_html=True,
     )
 
-    # ---------- NEW: 3-COLUMN IMAGE STRIP (USE YOUR OWN FILE NAMES) ----------
+    # ---------- 3-COLUMN IMAGE STRIP (REMOTE IMAGES, NO LOCAL FILES NEEDED) ----------
     col_img1, col_img2, col_img3 = st.columns(3)
 
     with col_img1:
         st.image(
-            "artisan_restoration.jpg",  # save your first image with this name
+            "https://images.pexels.com/photos/3811851/pexels-photo-3811851.jpeg?auto=compress&cs=tinysrgb&w=800",
             caption="Artisanal restoration – giving luxury leather a second life",
             use_container_width=True,
         )
 
     with col_img2:
         st.image(
-            "chanel_sneakers.jpg",      # save your second image with this name
-            caption="High-end sneakers – ideal candidates for ATELIER 8 care",
+            "https://images.pexels.com/photos/1457983/pexels-photo-1457983.jpeg?auto=compress&cs=tinysrgb&w=800",
+            caption="Designer sneakers – high-value pieces for circular care",
             use_container_width=True,
         )
 
     with col_img3:
         st.image(
-            "dior_bag.jpg",             # save your third image with this name
-            caption="Iconic Dior canvas – preservation and authentication focus",
+            "https://images.pexels.com/photos/1192601/pexels-photo-1192601.jpeg?auto=compress&cs=tinysrgb&w=800",
+            caption="Iconic luxury handbag – preservation & authentication focus",
             use_container_width=True,
         )
 
@@ -166,7 +166,6 @@ def main():
             "How much are they willing to spend?"
         )
 
-        # ---- Top-level metrics ----
         col1, col2, col3, col4 = st.columns(4)
         with col1:
             st.metric("Total respondents", len(filtered_df))
@@ -292,14 +291,12 @@ def main():
         )
         st.plotly_chart(fig, use_container_width=True)
 
-        # ---- E. UAE luxury market growth (illustrative) ----
+        # ---- E. Market context – growth of UAE luxury restoration/resale ----
         st.markdown("### E. Market context – growth of UAE luxury restoration/resale (illustrative index)")
-
         market_data = pd.DataFrame({
             "year": [2018, 2019, 2020, 2021, 2022, 2023, 2024, 2025],
             "luxury_resale_index": [100, 112, 125, 140, 158, 177, 195, 210],
         })
-
         fig = px.line(
             market_data,
             x="year",
@@ -383,7 +380,6 @@ def main():
 
         # Persona chips + downloadable summary
         available_clusters = sorted(summary.index.tolist())
-
         persona_labels = {
             0: "🟣 **Cluster 0 – High-income collectors** (high WTP, strong resale interest).",
             1: "🟢 **Cluster 1 – Conscious curators** (high sustainability, moderate WTP).",
@@ -392,7 +388,6 @@ def main():
             4: "🟠 **Cluster 4 – Occasional restorers** (few items, medium WTP).",
             5: "⚫ **Cluster 5 – Low-engagement segment** (low WTP, low resale interest).",
         }
-
         chip_lines = [persona_labels[c] for c in available_clusters if c in persona_labels]
 
         if chip_lines:
@@ -439,7 +434,6 @@ def main():
         # CLASSIFICATION
         with tabA:
             st.markdown("### 🧮 Logistic Regression – Who adopts?")
-
             st.markdown(
                 """
                 **Algorithm: Logistic Regression (binary classification)**  
@@ -487,7 +481,6 @@ def main():
         # REGRESSION (with scenario simulator)
         with tabB:
             st.markdown("### 💰 Regression Model – What drives WTP for Restoration?")
-
             st.markdown(
                 """
                 **Algorithm: Linear Regression**  
@@ -561,7 +554,6 @@ def main():
         # ASSOCIATIONS
         with tabC:
             st.markdown("### 🧷 Brand Association Patterns")
-
             st.markdown(
                 """
                 We examine how often brands are owned together: a light version of **association rule mining** to
@@ -617,7 +609,6 @@ def main():
             st.write("Preview of uploaded leads:")
             st.dataframe(udf.head())
 
-            # Train classifier on full data
             df_c = df.copy()
             df_c["adopt"] = (df_c["adoption_intent"] >= 4).astype(int)
 
