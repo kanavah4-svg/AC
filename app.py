@@ -47,8 +47,8 @@ def main():
             font-weight: 600;
             color: #A67800;
             box-shadow: 0px 2px 6px rgba(0,0,0,0.1);
-            animation: slide 10s linear infinite;
             white-space: nowrap;
+            animation: slide 10s linear infinite;
         }
 
         @keyframes slide {
@@ -136,10 +136,14 @@ def main():
         )
 
         col1, col2, col3, col4 = st.columns(4)
-        with col1: st.metric("Total respondents", len(filtered_df))
-        with col2: st.metric("% likely to adopt", f"{(filtered_df['adoption_intent']>=4).mean()*100:.1f}%")
-        with col3: st.metric("Avg WTP – restoration", f"AED {filtered_df['wtp_restoration_aed'].mean():,.0f}")
-        with col4: st.metric("Avg WTP – authentication", f"AED {filtered_df['wtp_authentication_aed'].mean():,.0f}")
+        with col1:
+            st.metric("Total respondents", len(filtered_df))
+        with col2:
+            st.metric("% likely to adopt (adoption ≥ 4)", f"{(filtered_df['adoption_intent']>=4).mean()*100:.1f}%")
+        with col3:
+            st.metric("Avg WTP – restoration", f"AED {filtered_df['wtp_restoration_aed'].mean():,.0f}")
+        with col4:
+            st.metric("Avg WTP – authentication", f"AED {filtered_df['wtp_authentication_aed'].mean():,.0f}")
 
         # Pie Charts
         st.markdown("### A. Audience mix at a glance")
@@ -230,14 +234,12 @@ def main():
 
         st.info("We use **K-Means Clustering** to discover patterns and natural customer groups.")
 
-        # Explain algorithm
         st.markdown(
             """
-            **Algorithm Used: K-Means Clustering**  
-            - Unsupervised ML algorithm  
-            - Groups customers into *K* clusters based on similarity  
-            - Ideal for defining marketing personas  
-            - Inputs: WTP, sustainability concern, ownership, resale interest  
+            **Algorithm used: K-Means clustering**  
+            - Unsupervised algorithm (no target label).  
+            - Groups customers into *K* clusters based on similarity in WTP, ownership, sustainability and resale interest.  
+            - Output is ideal for defining marketing personas and tailoring offers.  
             """
         )
 
@@ -250,7 +252,7 @@ def main():
         scaler = StandardScaler()
         X_scaled = scaler.fit_transform(features)
 
-        k = st.slider("Choose number of clusters", 2, 6, 4)
+        k = st.slider("Choose number of clusters (K)", 2, 6, 4)
         kmeans = KMeans(n_clusters=k, random_state=42, n_init=10)
         filtered_df["cluster"] = kmeans.fit_predict(X_scaled)
 
@@ -261,18 +263,23 @@ def main():
                 filtered_df,
                 x="wtp_restoration_aed", y="wtp_authentication_aed",
                 color="cluster", color_discrete_sequence=PALETTE,
-                hover_data=["income_level", "age_group"]
+                hover_data=["income_level", "age_group", "sustainability_importance", "resale_interest"],
+                title="Customer segments by WTP (restoration vs authentication)"
             )
             st.plotly_chart(fig, use_container_width=True)
 
         with col2:
-            st.dataframe(
+            summary = (
                 filtered_df.groupby("cluster")[
                     ["wtp_restoration_aed", "wtp_authentication_aed",
                      "sustainability_importance", "handbags_owned",
                      "sneakers_owned", "resale_interest"]
-                ].mean().round(1)
+                ]
+                .mean()
+                .round(1)
             )
+            st.markdown("**Cluster profile summary (averages)**")
+            st.dataframe(summary)
 
     # ---------- TAB 3: MODELS ----------
     with tab_models:
@@ -288,35 +295,65 @@ def main():
 
         # CLASSIFICATION
         with tabA:
-            st.markdown("### 🧮 Logistic Regression – Who Adopts?")
+            st.markdown("### 🧮 Logistic Regression – Who adopts?")
+
+            st.markdown(
+                """
+                **Algorithm: Logistic Regression (binary classification)**  
+                - Predicts whether a customer is **likely to adopt** ATELIER 8 (adoption score ≥ 4).  
+                - Outputs a probability between 0 and 1.  
+                """
+            )
 
             df_c = filtered_df.copy()
             df_c["adopt"] = (df_c["adoption_intent"] >= 4).astype(int)
 
             X = pd.get_dummies(
-                df_c[["age_group","income_level","gender","sustainability_importance",
-                      "owns_luxury_items","handbags_owned","sneakers_owned","resale_interest"]],
+                df_c[[
+                    "age_group", "income_level", "gender",
+                    "sustainability_importance", "owns_luxury_items",
+                    "handbags_owned", "sneakers_owned", "resale_interest"
+                ]],
                 drop_first=True
             )
             y = df_c["adopt"]
 
-            Xtr, Xts, ytr, yts = train_test_split(X, y, test_size=0.3,
-                                                  random_state=42, stratify=y)
+            Xtr, Xts, ytr, yts = train_test_split(
+                X, y, test_size=0.3, random_state=42, stratify=y
+            )
             clf = LogisticRegression(max_iter=1000)
             clf.fit(Xtr, ytr)
             pred = clf.predict(Xts)
 
-            st.write("**Accuracy:**", round(accuracy_score(yts, pred), 2))
-            st.dataframe(pd.DataFrame(classification_report(yts, pred, output_dict=True)))
+            acc = accuracy_score(yts, pred)
+            st.write(f"**Accuracy on test data:** `{acc:.2f}`")
 
-        # REGRESSION
+            report_df = pd.DataFrame(classification_report(yts, pred, output_dict=True)).transpose().round(2)
+            st.markdown("**Model performance by class**")
+            st.dataframe(report_df)
+
+        # REGRESSION  ✅ restored scenario simulator
         with tabB:
-            st.markdown("### 💰 Linear Regression – What drives WTP?")
+            st.markdown("### 💰 Regression Model – What drives WTP for Restoration?")
+
+            st.markdown(
+                """
+                **Algorithm: Linear Regression**  
+                - Predicts *expected willingness to pay for restoration (AED)*.  
+                - Shows how income level, number of items and attitudes (sustainability, resale interest)
+                  change the fair price ATELIER 8 can charge.  
+                """
+            )
 
             df_r = filtered_df.copy()
             Xr = pd.get_dummies(
-                df_r[["income_level","sustainability_importance",
-                      "handbags_owned","sneakers_owned","resale_interest"]],
+                df_r[[
+                    "income_level",
+                    "sustainability_importance",
+                    "handbags_owned",
+                    "sneakers_owned",
+                    "resale_interest"
+                ]],
                 drop_first=True
             )
             yr = df_r["wtp_restoration_aed"]
@@ -324,14 +361,59 @@ def main():
             reg = LinearRegression()
             reg.fit(Xr, yr)
 
-            coef_df = pd.DataFrame({"feature": Xr.columns, "coefficient": reg.coef_})
-            st.dataframe(coef_df.sort_values("coefficient", ascending=False))
+            coef_df = pd.DataFrame(
+                {"feature": Xr.columns, "coefficient": reg.coef_}
+            ).sort_values("coefficient", ascending=False)
+            st.markdown("**Model Coefficients (AED impact per unit change):**")
+            st.dataframe(coef_df)
+
+            st.markdown("### Scenario Simulator")
+
+            col_sim1, col_sim2, col_sim3 = st.columns(3)
+            with col_sim1:
+                sim_income = st.selectbox("Income level", ["Low", "Mid", "High", "Very High"], index=2)
+                sim_sust = st.slider("Sustainability importance", 1, 5, 4)
+            with col_sim2:
+                sim_bags = st.slider("Handbags owned", 0, 10, 2)
+                sim_sneakers = st.slider("Sneakers owned", 0, 10, 3)
+            with col_sim3:
+                sim_resale = st.slider("Resale interest", 1, 5, 4)
+
+            sim_row = pd.DataFrame(
+                {
+                    "income_level": [sim_income],
+                    "sustainability_importance": [sim_sust],
+                    "handbags_owned": [sim_bags],
+                    "sneakers_owned": [sim_sneakers],
+                    "resale_interest": [sim_resale],
+                }
+            )
+
+            sim_enc = pd.get_dummies(sim_row, columns=["income_level"], drop_first=True)
+            sim_enc = sim_enc.reindex(columns=Xr.columns, fill_value=0)
+
+            pred_wtp = reg.predict(sim_enc)[0]
+            st.success(f"Estimated WTP for restoration: **AED {pred_wtp:,.0f}**")
+
+            st.markdown("**Managerial takeaway:**")
+            st.write(
+                "Use this simulator to test pricing for **High / Very High income** collectors vs entry-level clients. "
+                "If Very High income with high sustainability and resale interest yields a much higher WTP, "
+                "ATELIER 8 can confidently design **premium tiers** without fear of underpricing."
+            )
 
         # ASSOCIATIONS
         with tabC:
             st.markdown("### 🧷 Brand Association Patterns")
 
-            brands = ["owns_chanel","owns_lv","owns_dior","owns_gucci","owns_hermes","owns_sneaker_grails"]
+            st.markdown(
+                """
+                We examine how often brands are owned together: a light version of **association rule mining** to
+                inspire bundles and cross-sell ideas.
+                """
+            )
+
+            brands = ["owns_chanel", "owns_lv", "owns_dior", "owns_gucci", "owns_hermes", "owns_sneaker_grails"]
             bdf = filtered_df[brands]
             total = len(bdf)
 
@@ -340,28 +422,36 @@ def main():
                 for j, b2 in enumerate(brands):
                     if i >= j:
                         continue
-                    both = ((bdf[b1]==1) & (bdf[b2]==1)).sum()
+                    both = ((bdf[b1] == 1) & (bdf[b2] == 1)).sum()
                     if both == 0:
                         continue
-                    support = both/total
-                    conf = both/ bdf[b1].sum()
-                    rules.append({"rule":f"{b1} → {b2}",
-                                  "support":round(support,3),
-                                  "confidence":round(conf,3)})
+                    support = both / total
+                    conf = both / bdf[b1].sum()
+                    rules.append(
+                        {
+                            "rule": f"{b1} → {b2}",
+                            "support": round(support, 3),
+                            "confidence": round(conf, 3),
+                        }
+                    )
 
-            st.dataframe(pd.DataFrame(rules).sort_values("confidence", ascending=False))
+            rules_df = pd.DataFrame(rules).sort_values("confidence", ascending=False)
+            st.dataframe(rules_df)
 
     # ---------- TAB 4: UPLOAD ----------
     with tab_upload:
         st.subheader("4️⃣ Upload & Score New Leads")
 
+        st.markdown("**Required columns in your CSV:**")
         st.code(
-            "age_group, income_level, gender, sustainability_importance, owns_luxury_items, handbags_owned, sneakers_owned, resale_interest"
+            "age_group, income_level, gender, sustainability_importance, "
+            "owns_luxury_items, handbags_owned, sneakers_owned, resale_interest"
         )
 
         file = st.file_uploader("Upload CSV", type=["csv"])
         if file:
             udf = pd.read_csv(file)
+            st.write("Preview of uploaded leads:")
             st.dataframe(udf.head())
 
             # Train classifier on full data
@@ -369,22 +459,30 @@ def main():
             df_c["adopt"] = (df_c["adoption_intent"] >= 4).astype(int)
 
             Xb = pd.get_dummies(
-                df_c[["age_group","income_level","gender","sustainability_importance",
-                      "owns_luxury_items","handbags_owned","sneakers_owned","resale_interest"]],
+                df_c[[
+                    "age_group", "income_level", "gender",
+                    "sustainability_importance", "owns_luxury_items",
+                    "handbags_owned", "sneakers_owned", "resale_interest"
+                ]],
                 drop_first=True
             )
             yb = df_c["adopt"]
 
-            clf_full = LogisticRegression(max_iter=1000).fit(Xb, yb)
+            clf_full = LogisticRegression(max_iter=1000)
+            clf_full.fit(Xb, yb)
 
             X_user = pd.get_dummies(
-                udf[["age_group","income_level","gender",
-                     "sustainability_importance","owns_luxury_items",
-                     "handbags_owned","sneakers_owned","resale_interest"]],
+                udf[[
+                    "age_group", "income_level", "gender",
+                    "sustainability_importance", "owns_luxury_items",
+                    "handbags_owned", "sneakers_owned", "resale_interest"
+                ]],
                 drop_first=True
-            ).reindex(columns=Xb.columns, fill_value=0)
+            )
+            X_user = X_user.reindex(columns=Xb.columns, fill_value=0)
 
-            udf["adoption_probability"] = clf_full.predict_proba(X_user)[:, 1].round(3)
+            probs = clf_full.predict_proba(X_user)[:, 1]
+            udf["adoption_probability"] = np.round(probs, 3)
 
             st.success("Lead scoring complete.")
             st.dataframe(udf.head())
