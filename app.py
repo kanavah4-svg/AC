@@ -41,6 +41,41 @@ def load_and_resize(path, size=(600, 600)):
     return None
 
 
+def pick_three_images():
+    """
+    Try to use preferred filenames first.
+    If they don't exist, fall back to any .jpg/.jpeg/.png in the folder.
+    """
+    preferred = [
+        "img_artisan_restoration.jpg",
+        "img_cleaning_process.jpg",
+        "img_final_red_bag.jpg",
+    ]
+
+    chosen = []
+
+    # 1) add preferred images if they exist
+    for name in preferred:
+        if os.path.exists(name):
+            chosen.append(name)
+
+    # 2) if fewer than 3, fill with any other image files in repo root
+    if len(chosen) < 3:
+        others = [
+            f
+            for f in os.listdir(".")
+            if f.lower().endswith((".jpg", ".jpeg", ".png"))
+            and f not in chosen
+        ]
+        others.sort()
+        for f in others:
+            if len(chosen) >= 3:
+                break
+            chosen.append(f)
+
+    return chosen
+
+
 def main():
 
     st.set_page_config(
@@ -103,49 +138,53 @@ def main():
     )
 
     # ---------- 3-COLUMN IMAGE STRIP (EQUAL SIZE, SAME ROW) ----------
+    image_paths = pick_three_images()
     col_img1, col_img2, col_img3 = st.columns(3)
 
+    # Column 1
     with col_img1:
-        img1 = load_and_resize("img_artisan_restoration.jpg")
-        if img1 is not None:
-            st.image(
-                img1,
-                caption="Artisanal restoration – giving luxury leather a second life",
-                use_container_width=True,
-            )
+        if len(image_paths) >= 1:
+            img1 = load_and_resize(image_paths[0])
+            if img1 is not None:
+                st.image(
+                    img1,
+                    caption="Artisanal restoration – giving luxury leather a second life",
+                    use_container_width=True,
+                )
+            else:
+                st.info("Image 1 could not be loaded.")
         else:
-            st.info(
-                "Add **img_artisan_restoration.jpg** next to `app.py` "
-                "to show the restoration image here."
-            )
+            st.info("No image files found in the app folder.")
 
+    # Column 2
     with col_img2:
-        img2 = load_and_resize("img_cleaning_process.jpg")
-        if img2 is not None:
-            st.image(
-                img2,
-                caption="Precision cleaning & care – preserving condition and value",
-                use_container_width=True,
-            )
+        if len(image_paths) >= 2:
+            img2 = load_and_resize(image_paths[1])
+            if img2 is not None:
+                st.image(
+                    img2,
+                    caption="Precision cleaning & care – preserving condition and value",
+                    use_container_width=True,
+                )
+            else:
+                st.info("Image 2 could not be loaded.")
         else:
-            st.info(
-                "Add **img_cleaning_process.jpg** next to `app.py` "
-                "to show the cleaning process image here."
-            )
+            st.info("Upload at least 2 image files to show here.")
 
+    # Column 3
     with col_img3:
-        img3 = load_and_resize("img_final_red_bag.jpg")
-        if img3 is not None:
-            st.image(
-                img3,
-                caption="Restored icon – ready for a second chapter in the wardrobe",
-                use_container_width=True,
-            )
+        if len(image_paths) >= 3:
+            img3 = load_and_resize(image_paths[2])
+            if img3 is not None:
+                st.image(
+                    img3,
+                    caption="Restored icon – ready for a second chapter in the wardrobe",
+                    use_container_width=True,
+                )
+            else:
+                st.info("Image 3 could not be loaded.")
         else:
-            st.info(
-                "Add **img_final_red_bag.jpg** next to `app.py` "
-                "to show the final restored bag image here."
-            )
+            st.info("Upload at least 3 image files to show here.")
 
     # ---------- INTRO EXPANDER ----------
     with st.expander("📌 What is this dashboard about?", expanded=True):
