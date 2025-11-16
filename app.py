@@ -15,11 +15,28 @@ PALETTE = ["#636EFA", "#EF553B", "#00CC96", "#AB63FA", "#FFA15A", "#19D3F3", "#F
 def load_data():
     return pd.read_csv("atelier8_survey_data.csv")
 
+
 def main():
     st.set_page_config(
         page_title="ATELIER 8 – Circular Luxury Intelligence Dashboard",
         page_icon="👜",
         layout="wide"
+    )
+
+    # ---------- GLOBAL PASTEL BACKGROUND ----------
+    st.markdown(
+        """
+        <style>
+        .stApp {
+            background-color: #f7f5ff;  /* soft pastel lilac */
+        }
+        .block-container {
+            padding-top: 1.5rem;
+            padding-bottom: 1.5rem;
+        }
+        </style>
+        """,
+        unsafe_allow_html=True,
     )
 
     # ---------- HEADER ----------
@@ -240,8 +257,19 @@ def main():
         st.subheader("2️⃣ Customer segments – data-driven luxury personas")
 
         st.info(
-            "We use K-Means clustering to group customers by willingness to pay, ownership, sustainability and resale "
-            "interest. You can rename each cluster into a simple persona for your assignment."
+            "We use clustering to spot natural groups of customers based on willingness to pay, ownership, "
+            "sustainability and resale interest."
+        )
+
+        st.markdown(
+            """
+            **Algorithm used here – K-Means clustering**
+
+            - Type: *unsupervised* learning (no target label).  
+            - It places customers into **K groups** so that people inside a group are similar to each other and
+              different from other groups on WTP, ownership and sustainability.  
+            - Output is ideal for building simple marketing personas and tailoring offers to each cluster.
+            """
         )
 
         features = filtered_df[
@@ -312,7 +340,8 @@ def main():
         st.subheader("3️⃣ Predictive models – from insight to action")
 
         st.info(
-            "These simple models show how ATELIER 8 could start using AI/ML: to score leads and to understand WTP drivers."
+            "These simple models show how ATELIER 8 could start using AI/ML: first to score leads, then to understand "
+            "what drives willingness to pay."
         )
 
         model_tab1, model_tab2, model_tab3 = st.tabs(
@@ -322,6 +351,16 @@ def main():
         # Classification
         with model_tab1:
             st.markdown("### 🧮 Classification – likely vs unlikely adopters")
+
+            st.markdown(
+                """
+                **Algorithm: Logistic Regression (classification)**  
+
+                - Predicts whether a customer is **likely to adopt** ATELIER 8 (adoption score ≥ 4) or not.  
+                - Uses inputs like age group, income, gender, ownership, sustainability and resale interest.  
+                - Output is a **probability between 0 and 1** – higher = more likely to try ATELIER 8 early.
+                """
+            )
 
             df_clf = filtered_df.copy()
             df_clf["adopt_label"] = (df_clf["adoption_intent"] >= 4).astype(int)
@@ -367,6 +406,17 @@ def main():
         # Regression
         with model_tab2:
             st.markdown("### 💰 Regression – drivers of WTP for restoration")
+
+            st.markdown(
+                """
+                **Algorithm: Linear Regression (pricing insight)**  
+
+                - Predicts **expected WTP for restoration (in AED)** based on income level, number of items, sustainability
+                  importance and resale interest.  
+                - Coefficients tell us **how many dirhams WTP changes** when a feature increases by one unit.  
+                - Useful for setting **data-backed price bands** (entry, standard, premium).
+                """
+            )
 
             df_reg = filtered_df.copy()
             X_reg = pd.get_dummies(
@@ -428,6 +478,18 @@ def main():
         # Association-like patterns
         with model_tab3:
             st.markdown("### 🧷 Association patterns – brand bundles & cross-sell ideas")
+
+            st.markdown(
+                """
+                **Technique: Simple co-occurrence / association-style analysis**  
+
+                - We look at how often **pairs of brands are owned together** by the same customer.  
+                - For each pair we calculate:  
+                  - **Support** – how many customers own both brands.  
+                  - **Confidence** – given that someone owns brand A, how likely is it they also own brand B?  
+                - This is a light-weight version of **association rule mining** used for designing bundles and cross-sell flows.
+                """
+            )
 
             brand_cols = ["owns_chanel", "owns_lv", "owns_dior", "owns_gucci", "owns_hermes", "owns_sneaker_grails"]
             brand_data = filtered_df[brand_cols]
@@ -544,6 +606,7 @@ def main():
 
     st.markdown("---")
     st.caption("ATELIER 8 · Circular Luxury · Data-Driven Stewardship")
+
 
 if __name__ == "__main__":
     main()
