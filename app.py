@@ -7,6 +7,7 @@ from sklearn.linear_model import LogisticRegression, LinearRegression
 from sklearn.cluster import KMeans
 from sklearn.metrics import accuracy_score, classification_report
 import plotly.express as px
+from PIL import Image  # for equal-size images
 
 # Pastel luxury colour palette for charts
 PALETTE = [
@@ -18,9 +19,17 @@ PALETTE = [
     "#D7BDE2",  # lavender
 ]
 
+
 @st.cache_data
 def load_data():
     return pd.read_csv("atelier8_survey_data.csv")
+
+
+def load_and_resize(path, size=(600, 600)):
+    """Load local image and resize so all three look equal in the row."""
+    img = Image.open(path)
+    img = img.resize(size)
+    return img
 
 
 def main():
@@ -28,7 +37,7 @@ def main():
     st.set_page_config(
         page_title="ATELIER 8 – Circular Luxury Intelligence Dashboard",
         page_icon="👜",
-        layout="wide"
+        layout="wide",
     )
 
     # ---------- BACKGROUND + HEADER + TEAM BADGE ----------
@@ -69,7 +78,7 @@ def main():
             Kanav | Jigyasa | Omkar | Hardik | Harshal
         </div>
         """,
-        unsafe_allow_html=True
+        unsafe_allow_html=True,
     )
 
     # ---------- HEADER ----------
@@ -84,27 +93,27 @@ def main():
         unsafe_allow_html=True,
     )
 
-    # ---------- 3-COLUMN IMAGE STRIP (REMOTE IMAGES, NO LOCAL FILES NEEDED) ----------
+    # ---------- 3-COLUMN IMAGE STRIP (EQUAL SIZE, SAME ROW) ----------
     col_img1, col_img2, col_img3 = st.columns(3)
 
     with col_img1:
         st.image(
-            "https://images.pexels.com/photos/3811851/pexels-photo-3811851.jpeg?auto=compress&cs=tinysrgb&w=800",
+            load_and_resize("img_artisan_restoration.jpg"),
             caption="Artisanal restoration – giving luxury leather a second life",
             use_container_width=True,
         )
 
     with col_img2:
         st.image(
-            "https://images.pexels.com/photos/1457983/pexels-photo-1457983.jpeg?auto=compress&cs=tinysrgb&w=800",
-            caption="Designer sneakers – high-value pieces for circular care",
+            load_and_resize("img_cleaning_process.jpg"),
+            caption="Precision cleaning & care – preserving condition and value",
             use_container_width=True,
         )
 
     with col_img3:
         st.image(
-            "https://images.pexels.com/photos/1192601/pexels-photo-1192601.jpeg?auto=compress&cs=tinysrgb&w=800",
-            caption="Iconic luxury handbag – preservation & authentication focus",
+            load_and_resize("img_final_red_bag.jpg"),
+            caption="Restored icon – ready for a second chapter in the wardrobe",
             use_container_width=True,
         )
 
@@ -137,7 +146,9 @@ def main():
         "Age group", sorted(df["age_group"].unique()), sorted(df["age_group"].unique())
     )
     income_filter = st.sidebar.multiselect(
-        "Income level", sorted(df["income_level"].unique()), sorted(df["income_level"].unique())
+        "Income level",
+        sorted(df["income_level"].unique()),
+        sorted(df["income_level"].unique()),
     )
     gender_filter = st.sidebar.multiselect(
         "Gender", sorted(df["gender"].unique()), sorted(df["gender"].unique())
@@ -154,7 +165,12 @@ def main():
 
     # ---------- TABS ----------
     tab_overview, tab_segments, tab_models, tab_upload = st.tabs(
-        ["1️⃣ Overview & Story", "2️⃣ Customer Segments", "3️⃣ Predictive Models", "4️⃣ Upload & Score New Data"]
+        [
+            "1️⃣ Overview & Story",
+            "2️⃣ Customer Segments",
+            "3️⃣ Predictive Models",
+            "4️⃣ Upload & Score New Data",
+        ]
     )
 
     # ---------- TAB 1: OVERVIEW ----------
@@ -172,17 +188,17 @@ def main():
         with col2:
             st.metric(
                 "% likely to adopt (adoption ≥ 4)",
-                f"{(filtered_df['adoption_intent']>=4).mean()*100:.1f}%"
+                f"{(filtered_df['adoption_intent']>=4).mean()*100:.1f}%",
             )
         with col3:
             st.metric(
                 "Avg WTP – restoration",
-                f"AED {filtered_df['wtp_restoration_aed'].mean():,.0f}"
+                f"AED {filtered_df['wtp_restoration_aed'].mean():,.0f}",
             )
         with col4:
             st.metric(
                 "Avg WTP – authentication",
-                f"AED {filtered_df['wtp_authentication_aed'].mean():,.0f}"
+                f"AED {filtered_df['wtp_authentication_aed'].mean():,.0f}",
             )
 
         # ---- A. Audience mix at a glance ----
@@ -218,7 +234,9 @@ def main():
         with colC:
             adoption_age = (
                 filtered_df.groupby("age_group")["adoption_intent"]
-                .mean().reset_index().sort_values("adoption_intent", ascending=False)
+                .mean()
+                .reset_index()
+                .sort_values("adoption_intent", ascending=False)
             )
             fig = px.bar(
                 adoption_age,
@@ -291,12 +309,16 @@ def main():
         )
         st.plotly_chart(fig, use_container_width=True)
 
-        # ---- E. Market context – growth of UAE luxury restoration/resale ----
-        st.markdown("### E. Market context – growth of UAE luxury restoration/resale (illustrative index)")
-        market_data = pd.DataFrame({
-            "year": [2018, 2019, 2020, 2021, 2022, 2023, 2024, 2025],
-            "luxury_resale_index": [100, 112, 125, 140, 158, 177, 195, 210],
-        })
+        # ---- E. Market context – illustrative growth chart ----
+        st.markdown(
+            "### E. Market context – growth of UAE luxury restoration/resale (illustrative index)"
+        )
+        market_data = pd.DataFrame(
+            {
+                "year": [2018, 2019, 2020, 2021, 2022, 2023, 2024, 2025],
+                "luxury_resale_index": [100, 112, 125, 140, 158, 177, 195, 210],
+            }
+        )
         fig = px.line(
             market_data,
             x="year",
@@ -423,9 +445,7 @@ def main():
     with tab_models:
         st.subheader("3️⃣ Predictive Models")
 
-        st.info(
-            "Simple ML models to predict adoption likelihood and analyse WTP drivers."
-        )
+        st.info("Simple ML models to predict adoption likelihood and analyse WTP drivers.")
 
         tabA, tabB, tabC = st.tabs(
             ["🧮 Classification", "💰 Regression", "🧷 Associations"]
@@ -472,9 +492,11 @@ def main():
             acc = accuracy_score(yts, pred)
             st.write(f"**Accuracy on test data:** `{acc:.2f}`")
 
-            report_df = pd.DataFrame(
-                classification_report(yts, pred, output_dict=True)
-            ).transpose().round(2)
+            report_df = (
+                pd.DataFrame(classification_report(yts, pred, output_dict=True))
+                .transpose()
+                .round(2)
+            )
             st.markdown("**Model performance by class**")
             st.dataframe(report_df)
 
@@ -538,7 +560,9 @@ def main():
                 }
             )
 
-            sim_enc = pd.get_dummies(sim_row, columns=["income_level"], drop_first=True)
+            sim_enc = pd.get_dummies(
+                sim_row, columns=["income_level"], drop_first=True
+            )
             sim_enc = sim_enc.reindex(columns=Xr.columns, fill_value=0)
 
             pred_wtp = reg.predict(sim_enc)[0]
@@ -590,7 +614,9 @@ def main():
                         }
                     )
 
-            rules_df = pd.DataFrame(rules).sort_values("confidence", ascending=False)
+            rules_df = rules_df = pd.DataFrame(rules).sort_values(
+                "confidence", ascending=False
+            )
             st.dataframe(rules_df)
 
     # ---------- TAB 4: UPLOAD ----------
