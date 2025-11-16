@@ -8,11 +8,15 @@ from sklearn.cluster import KMeans
 from sklearn.metrics import accuracy_score, classification_report
 import plotly.express as px
 
-# Colour palettes for charts
-PALETTE = ["#636EFA", "#EF553B", "#00CC96", "#AB63FA", "#FFA15A", "#19D3F3", "#FF6692"]
-PALETTE2 = ["#FF6B6B", "#4ECDC4", "#FFD166", "#1A535C", "#C06C84", "#6C5B7B", "#355C7D"]
-PALETTE3 = ["#003f5c", "#58508d", "#bc5090", "#ff6361", "#ffa600"]
-PALETTE4 = ["#118AB2", "#06D6A0", "#FFD166", "#EF476F", "#073B4C"]
+# Luxury colour palette for all charts – coherent & premium
+PALETTE = [
+    "#1F2933",  # deep ink
+    "#C28D44",  # antique gold
+    "#D4B59D",  # warm beige / leather
+    "#9CA3AF",  # soft grey
+    "#7F9C96",  # muted sage
+    "#C4A6B6",  # dusty mauve
+]
 
 @st.cache_data
 def load_data():
@@ -80,6 +84,14 @@ def main():
         unsafe_allow_html=True,
     )
 
+    # ---------- NEW: HORIZONTAL HERO IMAGE ----------
+    st.image(
+        "https://images.pexels.com/photos/3755706/pexels-photo-3755706.jpeg"
+        "?auto=compress&cs=tinysrgb&w=1600",
+        caption="ATELIER 8 · Circular care for high-end handbags & sneakers in the UAE.",
+        use_container_width=True,
+    )
+
     # ---------- INTRO EXPANDER ----------
     with st.expander("📌 What is this dashboard about?", expanded=True):
         st.write(
@@ -138,62 +150,53 @@ def main():
             "How much are they willing to spend?"
         )
 
-        # ---- Luxury visual moodboard (images) ----
-        st.markdown("### ✨ Atelier 8 visual moodboard")
-        c1, c2, c3 = st.columns(3)
-        with c1:
-            st.image(
-                "https://images.pexels.com/photos/291762/pexels-photo-291762.jpeg",
-                caption="Curated luxury handbags – ideal ATELIER 8 clients",
-                use_container_width=True,
-            )
-        with c2:
-            st.image(
-                "https://images.pexels.com/photos/2529148/pexels-photo-2529148.jpeg",
-                caption="Sneaker culture – restoration & authentication opportunities",
-                use_container_width=True,
-            )
-        with c3:
-            st.image(
-                "https://images.pexels.com/photos/167404/pexels-photo-167404.jpeg",
-                caption="Artisanal care – bringing pieces back to life",
-                use_container_width=True,
-            )
-
         # ---- Top-level metrics ----
         col1, col2, col3, col4 = st.columns(4)
         with col1:
             st.metric("Total respondents", len(filtered_df))
         with col2:
-            st.metric("% likely to adopt (adoption ≥ 4)", f"{(filtered_df['adoption_intent']>=4).mean()*100:.1f}%")
+            st.metric(
+                "% likely to adopt (adoption ≥ 4)",
+                f"{(filtered_df['adoption_intent']>=4).mean()*100:.1f}%"
+            )
         with col3:
-            st.metric("Avg WTP – restoration", f"AED {filtered_df['wtp_restoration_aed'].mean():,.0f}")
+            st.metric(
+                "Avg WTP – restoration",
+                f"AED {filtered_df['wtp_restoration_aed'].mean():,.0f}"
+            )
         with col4:
-            st.metric("Avg WTP – authentication", f"AED {filtered_df['wtp_authentication_aed'].mean():,.0f}")
+            st.metric(
+                "Avg WTP – authentication",
+                f"AED {filtered_df['wtp_authentication_aed'].mean():,.0f}"
+            )
 
-        # Pie Charts
+        # ---- A. Audience mix at a glance ----
         st.markdown("### A. Audience mix at a glance")
         colA, colB = st.columns(2)
 
         with colA:
             fig = px.pie(
-                filtered_df, names="income_level",
+                filtered_df,
+                names="income_level",
                 title="Customer split by income level",
-                color="income_level", color_discrete_sequence=PALETTE
+                color="income_level",
+                color_discrete_sequence=PALETTE,
             )
             fig.update_traces(textposition="inside", textinfo="percent+label")
             st.plotly_chart(fig, use_container_width=True)
 
         with colB:
             fig = px.pie(
-                filtered_df, names="gender",
+                filtered_df,
+                names="gender",
                 title="Customer split by gender",
-                color="gender", color_discrete_sequence=PALETTE2
+                color="gender",
+                color_discrete_sequence=PALETTE,
             )
             fig.update_traces(textposition="inside", textinfo="percent+label")
             st.plotly_chart(fig, use_container_width=True)
 
-        # Adoption & sustainability
+        # ---- B. Adoption & sustainability view ----
         st.markdown("### B. Adoption & sustainability view")
         colC, colD = st.columns(2)
 
@@ -204,34 +207,48 @@ def main():
             )
             fig = px.bar(
                 adoption_age,
-                x="age_group", y="adoption_intent",
-                color="age_group", color_discrete_sequence=PALETTE3,
-                title="Average adoption intention by age group"
+                x="age_group",
+                y="adoption_intent",
+                color="age_group",
+                color_discrete_sequence=PALETTE,
+                title="Average adoption intention by age group",
             )
             fig.update_layout(showlegend=False)
             st.plotly_chart(fig, use_container_width=True)
 
         with colD:
             fig = px.histogram(
-                filtered_df, x="sustainability_importance", nbins=5,
+                filtered_df,
+                x="sustainability_importance",
+                nbins=5,
                 title="Sustainability importance distribution",
-                color_discrete_sequence=[PALETTE4[1]]
+                color_discrete_sequence=[PALETTE[2]],
             )
             st.plotly_chart(fig, use_container_width=True)
 
-        # Ownership & WTP
+        # ---- C. Luxury ownership & willingness to pay ----
         st.markdown("### C. Luxury ownership & willingness to pay")
         colE, colF = st.columns(2)
 
         with colE:
-            brands = ["owns_chanel", "owns_lv", "owns_dior", "owns_gucci", "owns_hermes", "owns_sneaker_grails"]
+            brands = [
+                "owns_chanel",
+                "owns_lv",
+                "owns_dior",
+                "owns_gucci",
+                "owns_hermes",
+                "owns_sneaker_grails",
+            ]
             bc = filtered_df[brands].sum().reset_index()
             bc.columns = ["brand", "count"]
 
             fig = px.bar(
-                bc, x="brand", y="count",
+                bc,
+                x="brand",
+                y="count",
                 title="Ownership of key luxury brands",
-                color="brand", color_discrete_sequence=PALETTE4
+                color="brand",
+                color_discrete_sequence=PALETTE,
             )
             fig.update_layout(showlegend=False)
             st.plotly_chart(fig, use_container_width=True)
@@ -239,27 +256,32 @@ def main():
         with colF:
             fig = px.box(
                 filtered_df,
-                x="income_level", y="wtp_restoration_aed",
+                x="income_level",
+                y="wtp_restoration_aed",
                 title="WTP for restoration by income level",
-                color="income_level", color_discrete_sequence=PALETTE2
+                color="income_level",
+                color_discrete_sequence=PALETTE,
             )
             st.plotly_chart(fig, use_container_width=True)
 
+        # ---- D. Sustainability ↔ WTP relationship ----
         st.markdown("### D. Sustainability ↔ WTP relationship")
         fig = px.scatter(
             filtered_df,
-            x="sustainability_importance", y="wtp_restoration_aed",
-            color="income_level", color_discrete_sequence=PALETTE3,
-            title="Sustainability vs WTP (restoration)"
+            x="sustainability_importance",
+            y="wtp_restoration_aed",
+            color="income_level",
+            color_discrete_sequence=PALETTE,
+            title="Sustainability vs WTP (restoration)",
         )
         st.plotly_chart(fig, use_container_width=True)
 
-        # ---- NEW: E. UAE luxury market growth (illustrative) ----
+        # ---- E. UAE luxury market growth (illustrative) ----
         st.markdown("### E. Market context – growth of UAE luxury restoration/resale (illustrative index)")
 
         market_data = pd.DataFrame({
             "year": [2018, 2019, 2020, 2021, 2022, 2023, 2024, 2025],
-            "luxury_resale_index": [100, 112, 125, 140, 158, 177, 195, 210]
+            "luxury_resale_index": [100, 112, 125, 140, 158, 177, 195, 210],
         })
 
         fig = px.line(
@@ -268,7 +290,7 @@ def main():
             y="luxury_resale_index",
             markers=True,
             title="Growing demand for luxury resale & restoration in UAE (Index: 2018 = 100)",
-            color_discrete_sequence=[PALETTE[0]]
+            color_discrete_sequence=[PALETTE[0]],
         )
         fig.update_layout(yaxis_title="Demand index (2018 = 100)")
         st.plotly_chart(fig, use_container_width=True)
@@ -289,9 +311,14 @@ def main():
         )
 
         features = filtered_df[
-            ["wtp_restoration_aed", "wtp_authentication_aed",
-             "sustainability_importance", "handbags_owned",
-             "sneakers_owned", "resale_interest"]
+            [
+                "wtp_restoration_aed",
+                "wtp_authentication_aed",
+                "sustainability_importance",
+                "handbags_owned",
+                "sneakers_owned",
+                "resale_interest",
+            ]
         ]
 
         scaler = StandardScaler()
@@ -306,19 +333,31 @@ def main():
         with col1:
             fig = px.scatter(
                 filtered_df,
-                x="wtp_restoration_aed", y="wtp_authentication_aed",
-                color="cluster", color_discrete_sequence=PALETTE,
-                hover_data=["income_level", "age_group", "sustainability_importance", "resale_interest"],
-                title="Customer segments by WTP (restoration vs authentication)"
+                x="wtp_restoration_aed",
+                y="wtp_authentication_aed",
+                color="cluster",
+                color_discrete_sequence=PALETTE,
+                hover_data=[
+                    "income_level",
+                    "age_group",
+                    "sustainability_importance",
+                    "resale_interest",
+                ],
+                title="Customer segments by WTP (restoration vs authentication)",
             )
             st.plotly_chart(fig, use_container_width=True)
 
         with col2:
             summary = (
                 filtered_df.groupby("cluster")[
-                    ["wtp_restoration_aed", "wtp_authentication_aed",
-                     "sustainability_importance", "handbags_owned",
-                     "sneakers_owned", "resale_interest"]
+                    [
+                        "wtp_restoration_aed",
+                        "wtp_authentication_aed",
+                        "sustainability_importance",
+                        "handbags_owned",
+                        "sneakers_owned",
+                        "resale_interest",
+                    ]
                 ]
                 .mean()
                 .round(1)
@@ -326,7 +365,7 @@ def main():
             st.markdown("**Cluster profile summary (averages)**")
             st.dataframe(summary)
 
-        # ---- NEW: persona chips + downloadable summary ----
+        # Persona chips + downloadable summary
         available_clusters = sorted(summary.index.tolist())
 
         persona_labels = {
@@ -344,7 +383,6 @@ def main():
             st.markdown("**Suggested personas (for your report / slides):**")
             st.markdown("\n".join(chip_lines))
 
-        # Build simple text report for download
         lines = [
             "ATELIER 8 – Customer Segment Summary",
             "------------------------------------",
@@ -398,12 +436,19 @@ def main():
             df_c["adopt"] = (df_c["adoption_intent"] >= 4).astype(int)
 
             X = pd.get_dummies(
-                df_c[[
-                    "age_group", "income_level", "gender",
-                    "sustainability_importance", "owns_luxury_items",
-                    "handbags_owned", "sneakers_owned", "resale_interest"
-                ]],
-                drop_first=True
+                df_c[
+                    [
+                        "age_group",
+                        "income_level",
+                        "gender",
+                        "sustainability_importance",
+                        "owns_luxury_items",
+                        "handbags_owned",
+                        "sneakers_owned",
+                        "resale_interest",
+                    ]
+                ],
+                drop_first=True,
             )
             y = df_c["adopt"]
 
@@ -417,7 +462,9 @@ def main():
             acc = accuracy_score(yts, pred)
             st.write(f"**Accuracy on test data:** `{acc:.2f}`")
 
-            report_df = pd.DataFrame(classification_report(yts, pred, output_dict=True)).transpose().round(2)
+            report_df = pd.DataFrame(
+                classification_report(yts, pred, output_dict=True)
+            ).transpose().round(2)
             st.markdown("**Model performance by class**")
             st.dataframe(report_df)
 
@@ -436,14 +483,16 @@ def main():
 
             df_r = filtered_df.copy()
             Xr = pd.get_dummies(
-                df_r[[
-                    "income_level",
-                    "sustainability_importance",
-                    "handbags_owned",
-                    "sneakers_owned",
-                    "resale_interest"
-                ]],
-                drop_first=True
+                df_r[
+                    [
+                        "income_level",
+                        "sustainability_importance",
+                        "handbags_owned",
+                        "sneakers_owned",
+                        "resale_interest",
+                    ]
+                ],
+                drop_first=True,
             )
             yr = df_r["wtp_restoration_aed"]
 
@@ -460,7 +509,9 @@ def main():
 
             col_sim1, col_sim2, col_sim3 = st.columns(3)
             with col_sim1:
-                sim_income = st.selectbox("Income level", ["Low", "Mid", "High", "Very High"], index=2)
+                sim_income = st.selectbox(
+                    "Income level", ["Low", "Mid", "High", "Very High"], index=2
+                )
                 sim_sust = st.slider("Sustainability importance", 1, 5, 4)
             with col_sim2:
                 sim_bags = st.slider("Handbags owned", 0, 10, 2)
@@ -502,7 +553,14 @@ def main():
                 """
             )
 
-            brands = ["owns_chanel", "owns_lv", "owns_dior", "owns_gucci", "owns_hermes", "owns_sneaker_grails"]
+            brands = [
+                "owns_chanel",
+                "owns_lv",
+                "owns_dior",
+                "owns_gucci",
+                "owns_hermes",
+                "owns_sneaker_grails",
+            ]
             bdf = filtered_df[brands]
             total = len(bdf)
 
@@ -548,12 +606,19 @@ def main():
             df_c["adopt"] = (df_c["adoption_intent"] >= 4).astype(int)
 
             Xb = pd.get_dummies(
-                df_c[[
-                    "age_group", "income_level", "gender",
-                    "sustainability_importance", "owns_luxury_items",
-                    "handbags_owned", "sneakers_owned", "resale_interest"
-                ]],
-                drop_first=True
+                df_c[
+                    [
+                        "age_group",
+                        "income_level",
+                        "gender",
+                        "sustainability_importance",
+                        "owns_luxury_items",
+                        "handbags_owned",
+                        "sneakers_owned",
+                        "resale_interest",
+                    ]
+                ],
+                drop_first=True,
             )
             yb = df_c["adopt"]
 
@@ -561,12 +626,19 @@ def main():
             clf_full.fit(Xb, yb)
 
             X_user = pd.get_dummies(
-                udf[[
-                    "age_group", "income_level", "gender",
-                    "sustainability_importance", "owns_luxury_items",
-                    "handbags_owned", "sneakers_owned", "resale_interest"
-                ]],
-                drop_first=True
+                udf[
+                    [
+                        "age_group",
+                        "income_level",
+                        "gender",
+                        "sustainability_importance",
+                        "owns_luxury_items",
+                        "handbags_owned",
+                        "sneakers_owned",
+                        "resale_interest",
+                    ]
+                ],
+                drop_first=True,
             )
             X_user = X_user.reindex(columns=Xb.columns, fill_value=0)
 
@@ -580,7 +652,7 @@ def main():
                 "Download scored CSV",
                 udf.to_csv(index=False).encode("utf-8"),
                 "atelier8_scored_leads.csv",
-                "text/csv"
+                "text/csv",
             )
 
     st.markdown("---")
