@@ -31,7 +31,7 @@ def main():
         layout="wide"
     )
 
-    # ---------- UPDATED BACKGROUND + HEADER + TEAM BADGE ----------
+    # ---------- BACKGROUND + HEADER + TEAM BADGE ----------
     st.markdown(
         """
         <style>
@@ -84,13 +84,29 @@ def main():
         unsafe_allow_html=True,
     )
 
-    # ---------- NEW: HORIZONTAL HERO IMAGE ----------
-    st.image(
-        "https://images.pexels.com/photos/3755706/pexels-photo-3755706.jpeg"
-        "?auto=compress&cs=tinysrgb&w=1600",
-        caption="ATELIER 8 · Circular care for high-end handbags & sneakers in the UAE.",
-        use_container_width=True,
-    )
+    # ---------- NEW: 3-COLUMN IMAGE STRIP (USE YOUR OWN FILE NAMES) ----------
+    col_img1, col_img2, col_img3 = st.columns(3)
+
+    with col_img1:
+        st.image(
+            "artisan_restoration.jpg",  # save your first image with this name
+            caption="Artisanal restoration – giving luxury leather a second life",
+            use_container_width=True,
+        )
+
+    with col_img2:
+        st.image(
+            "chanel_sneakers.jpg",      # save your second image with this name
+            caption="High-end sneakers – ideal candidates for ATELIER 8 care",
+            use_container_width=True,
+        )
+
+    with col_img3:
+        st.image(
+            "dior_bag.jpg",             # save your third image with this name
+            caption="Iconic Dior canvas – preservation and authentication focus",
+            use_container_width=True,
+        )
 
     # ---------- INTRO EXPANDER ----------
     with st.expander("📌 What is this dashboard about?", expanded=True):
