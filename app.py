@@ -236,10 +236,10 @@ def main():
 
         st.markdown(
             """
-            **Algorithm used: K-Means clustering**  
-            - Unsupervised algorithm (no target label).  
-            - Groups customers into *K* clusters based on similarity in WTP, ownership, sustainability and resale interest.  
-            - Output is ideal for defining marketing personas and tailoring offers.  
+            **What is clustering and K-Means, and why are we using it?**  
+            - *Clustering* groups similar customers together without any pre-defined labels – it lets the data reveal natural segments.  
+            - **K-Means** is a simple, widely used clustering algorithm that assigns every customer to one of *K* groups based on similarity in behaviour.  
+            - For ATELIER 8, this helps us turn raw survey responses into **clear personas** (e.g., high-income collectors, sneaker heads, conscious curators) for targeted strategies.
             """
         )
 
@@ -281,7 +281,7 @@ def main():
             st.markdown("**Cluster profile summary (averages)**")
             st.dataframe(summary)
 
-        # ---- NEW: persona chips + downloadable summary ----
+        # ---- Persona chips + downloadable summary ----
         available_clusters = sorted(summary.index.tolist())
 
         persona_labels = {
@@ -330,7 +330,8 @@ def main():
         st.subheader("3️⃣ Predictive Models")
 
         st.info(
-            "Simple ML models to predict adoption likelihood and analyse WTP drivers."
+            "These models show how ATELIER 8 can move from descriptive insights (what is happening) "
+            "to predictive intelligence (what is likely to happen next)."
         )
 
         tabA, tabB, tabC = st.tabs(
@@ -343,9 +344,10 @@ def main():
 
             st.markdown(
                 """
-                **Algorithm: Logistic Regression (binary classification)**  
-                - Predicts whether a customer is **likely to adopt** ATELIER 8 (adoption score ≥ 4).  
-                - Outputs a probability between 0 and 1.  
+                **What is Logistic Regression and why are we using it?**  
+                - Logistic Regression is a **classification algorithm** that predicts the probability of an event with two outcomes (e.g., adopt vs. not adopt).  
+                - Here, we predict whether a customer’s adoption score is **high (≥4)** based on their profile (income, ownership, sustainability, resale interest, etc.).  
+                - For ATELIER 8, this helps prioritise **which leads are most likely to say “yes” first**, so marketing can focus effort on high-potential customers.
                 """
             )
 
@@ -382,10 +384,10 @@ def main():
 
             st.markdown(
                 """
-                **Algorithm: Linear Regression**  
-                - Predicts *expected willingness to pay for restoration (AED)*.  
-                - Shows how income level, number of items and attitudes (sustainability, resale interest)
-                  change the fair price ATELIER 8 can charge.  
+                **What is Regression and why are we using it?**  
+                - Regression predicts a **continuous numeric value**, such as willingness to pay (in AED) for a service.  
+                - Our Linear Regression model estimates WTP based on income level, number of items, sustainability importance and resale interest.  
+                - For ATELIER 8, this tells us **how much different types of customers are likely to pay**, supporting smarter price band design (entry, standard, premium tiers).
                 """
             )
 
@@ -452,8 +454,10 @@ def main():
 
             st.markdown(
                 """
-                We examine how often brands are owned together: a light version of **association rule mining** to
-                inspire bundles and cross-sell ideas.
+                **What is Association Rule Mining and why are we using it?**  
+                - Association rule mining looks for **items that frequently occur together** in the same basket or customer profile.  
+                - Here, we check which luxury brands (Chanel, LV, Gucci, sneakers, etc.) tend to be owned together by the same person.  
+                - For ATELIER 8, this helps design **cross-sell bundles and combined spa offers**, e.g., “Chanel flap + LV Neverfull restoration combo” for customers likely to own both.
                 """
             )
 
