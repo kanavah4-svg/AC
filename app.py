@@ -7,7 +7,8 @@ from sklearn.linear_model import LogisticRegression, LinearRegression
 from sklearn.cluster import KMeans
 from sklearn.metrics import accuracy_score, classification_report
 import plotly.express as px
-from PIL import Image  # for equal-size images
+from PIL import Image
+import os
 
 # Pastel luxury colour palette for charts
 PALETTE = [
@@ -26,10 +27,18 @@ def load_data():
 
 
 def load_and_resize(path, size=(600, 600)):
-    """Load local image and resize so all three look equal in the row."""
-    img = Image.open(path)
-    img = img.resize(size)
-    return img
+    """
+    Safely load local image and resize so all three look equal in the row.
+    If the file is missing or broken, return None instead of crashing.
+    """
+    try:
+        if os.path.exists(path):
+            img = Image.open(path)
+            img = img.resize(size)
+            return img
+    except Exception:
+        pass
+    return None
 
 
 def main():
@@ -97,25 +106,46 @@ def main():
     col_img1, col_img2, col_img3 = st.columns(3)
 
     with col_img1:
-        st.image(
-            load_and_resize("img_artisan_restoration.jpg"),
-            caption="Artisanal restoration – giving luxury leather a second life",
-            use_container_width=True,
-        )
+        img1 = load_and_resize("img_artisan_restoration.jpg")
+        if img1 is not None:
+            st.image(
+                img1,
+                caption="Artisanal restoration – giving luxury leather a second life",
+                use_container_width=True,
+            )
+        else:
+            st.info(
+                "Add **img_artisan_restoration.jpg** next to `app.py` "
+                "to show the restoration image here."
+            )
 
     with col_img2:
-        st.image(
-            load_and_resize("img_cleaning_process.jpg"),
-            caption="Precision cleaning & care – preserving condition and value",
-            use_container_width=True,
-        )
+        img2 = load_and_resize("img_cleaning_process.jpg")
+        if img2 is not None:
+            st.image(
+                img2,
+                caption="Precision cleaning & care – preserving condition and value",
+                use_container_width=True,
+            )
+        else:
+            st.info(
+                "Add **img_cleaning_process.jpg** next to `app.py` "
+                "to show the cleaning process image here."
+            )
 
     with col_img3:
-        st.image(
-            load_and_resize("img_final_red_bag.jpg"),
-            caption="Restored icon – ready for a second chapter in the wardrobe",
-            use_container_width=True,
-        )
+        img3 = load_and_resize("img_final_red_bag.jpg")
+        if img3 is not None:
+            st.image(
+                img3,
+                caption="Restored icon – ready for a second chapter in the wardrobe",
+                use_container_width=True,
+            )
+        else:
+            st.info(
+                "Add **img_final_red_bag.jpg** next to `app.py` "
+                "to show the final restored bag image here."
+            )
 
     # ---------- INTRO EXPANDER ----------
     with st.expander("📌 What is this dashboard about?", expanded=True):
@@ -614,7 +644,7 @@ def main():
                         }
                     )
 
-            rules_df = rules_df = pd.DataFrame(rules).sort_values(
+            rules_df = pd.DataFrame(rules).sort_values(
                 "confidence", ascending=False
             )
             st.dataframe(rules_df)
