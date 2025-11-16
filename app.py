@@ -281,6 +281,50 @@ def main():
             st.markdown("**Cluster profile summary (averages)**")
             st.dataframe(summary)
 
+        # ---- NEW: persona chips + downloadable summary ----
+        available_clusters = sorted(summary.index.tolist())
+
+        persona_labels = {
+            0: "🟣 **Cluster 0 – High-income collectors** (high WTP, strong resale interest).",
+            1: "🟢 **Cluster 1 – Conscious curators** (high sustainability, moderate WTP).",
+            2: "🔵 **Cluster 2 – Hype sneaker owners** (many sneakers, good WTP).",
+            3: "🟡 **Cluster 3 – Value seekers** (price sensitive, lower WTP).",
+            4: "🟠 **Cluster 4 – Occasional restorers** (few items, medium WTP).",
+            5: "⚫ **Cluster 5 – Low-engagement segment** (low WTP, low resale interest).",
+        }
+
+        chip_lines = [persona_labels[c] for c in available_clusters if c in persona_labels]
+
+        if chip_lines:
+            st.markdown("**Suggested personas (for your report / slides):**")
+            st.markdown("\n".join(chip_lines))
+
+        # Build simple text report for download
+        lines = [
+            "ATELIER 8 – Customer Segment Summary",
+            "------------------------------------",
+            "",
+        ]
+        for c in available_clusters:
+            row = summary.loc[c]
+            lines.append(
+                f"Cluster {c}: "
+                f"Avg WTP restoration = AED {row['wtp_restoration_aed']:.0f}, "
+                f"Avg WTP authentication = AED {row['wtp_authentication_aed']:.0f}, "
+                f"Sustainability importance = {row['sustainability_importance']:.1f}, "
+                f"Handbags owned = {row['handbags_owned']:.1f}, "
+                f"Sneakers owned = {row['sneakers_owned']:.1f}, "
+                f"Resale interest = {row['resale_interest']:.1f}."
+            )
+
+        report_text = "\n".join(lines)
+        st.download_button(
+            "Download cluster persona summary (TXT)",
+            data=report_text.encode("utf-8"),
+            file_name="atelier8_customer_segments_summary.txt",
+            mime="text/plain",
+        )
+
     # ---------- TAB 3: MODELS ----------
     with tab_models:
         st.subheader("3️⃣ Predictive Models")
@@ -332,7 +376,7 @@ def main():
             st.markdown("**Model performance by class**")
             st.dataframe(report_df)
 
-        # REGRESSION  ✅ restored scenario simulator
+        # REGRESSION (with scenario simulator)
         with tabB:
             st.markdown("### 💰 Regression Model – What drives WTP for Restoration?")
 
