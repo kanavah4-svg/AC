@@ -24,73 +24,38 @@ def main():
         layout="wide"
     )
 
-    # ---------- MODERN LUXURY THEME + PREMIUM FONTS + TEAM BADGE ----------
+    # ---------- UPDATED BACKGROUND + HEADER + TEAM BADGE ----------
     st.markdown(
         """
         <style>
-
-        /* Import elegant premium fonts */
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Playfair+Display:ital,wght@1,400;1,500;1,600&display=swap');
-
-        /* App background and base font */
         .stApp {
-            background-color: #F5F7FB;  /* soft cool off-white */
-            font-family: 'Inter', sans-serif;
+            background-color: #FFF4E2; /* Warm beige luxury background */
         }
 
-        /* Main title - luxury serif italic */
         h1 {
-            font-family: 'Playfair Display', serif !important;
-            font-size: 2.4rem !important;
-            font-style: italic !important;
-            font-weight: 600 !important;
-            color: #111827 !important;  /* deep slate */
-            letter-spacing: 0.02em;
-            margin-top: 0.5rem;
+            color: #D4AF37 !important; /* Luxury golden heading */
         }
 
-        /* Subheaders */
-        h2, h3, h4 {
-            font-family: 'Playfair Display', serif !important;
-            font-style: italic !important;
-            color: #1f2937 !important;
-            letter-spacing: 0.01em;
-        }
-
-        /* Regular text elements */
-        body, p, div, span {
-            font-family: 'Inter', sans-serif !important;
-        }
-
-        /* Main content container width + padding */
-        .block-container {
-            padding-top: 1.5rem;
-            padding-bottom: 1.5rem;
-            max-width: 1250px;
-        }
-
-        /* Team badge (top-right) */
         .team-bar {
             position: absolute;
             top: 18px;
             right: 30px;
-            background: linear-gradient(135deg, #0f172a, #1e293b);
-            padding: 6px 18px;
-            border-radius: 999px;
-            font-size: 13px;
+            background-color: #FFE9C7;
+            padding: 6px 16px;
+            border-radius: 12px;
+            font-size: 14px;
             font-weight: 600;
-            color: #F9FAFB;
-            box-shadow: 0px 4px 12px rgba(15,23,42,0.35);
+            color: #A67800;
+            box-shadow: 0px 2px 6px rgba(0,0,0,0.1);
             white-space: nowrap;
             animation: slide 10s linear infinite;
         }
 
         @keyframes slide {
-            0% { transform: translateX(20%); }
-            50% { transform: translateX(-20%); }
-            100% { transform: translateX(20%); }
+            0% { transform: translateX(25%); }
+            50% { transform: translateX(-25%); }
+            100% { transform: translateX(25%); }
         }
-
         </style>
 
         <div class="team-bar">
@@ -316,7 +281,7 @@ def main():
             st.markdown("**Cluster profile summary (averages)**")
             st.dataframe(summary)
 
-        # ---- Persona chips + downloadable summary ----
+        # ---- NEW: persona chips + downloadable summary ----
         available_clusters = sorted(summary.index.tolist())
 
         persona_labels = {
